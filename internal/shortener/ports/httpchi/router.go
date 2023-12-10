@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func NewRouter(s Handler) http.Handler {
+func New(h Handler) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -15,7 +15,7 @@ func NewRouter(s Handler) http.Handler {
 	r.Use(middleware.CleanPath)
 	r.Use(middleware.Recoverer)
 
-	r.Get("/{alias}", s.GetOrigURL)
-	r.Post("/alias", s.CrateAlias)
+	r.Get("/{alias}", h.GetOrigURL)
+	r.Post("/alias", h.CrateAlias)
 	return r
 }
