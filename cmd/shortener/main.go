@@ -21,6 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
+	defer repo.DB.Close()
 	log.Info().Msg("repository init success")
 
 	URLService := service.New(repo, cfg.App.Address)
