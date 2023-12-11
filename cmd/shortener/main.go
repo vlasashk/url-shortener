@@ -23,7 +23,7 @@ func main() {
 	}
 	log.Info().Msg("repository init success")
 
-	URLService := service.New(repo)
+	URLService := service.New(repo, cfg.App.Address)
 
 	log.Fatal().Err(httpchi.Run(URLService, log, cfg.App)).Send()
 }

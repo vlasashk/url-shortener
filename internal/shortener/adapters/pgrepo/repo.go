@@ -16,7 +16,9 @@ const (
 )
 
 const (
-	createQry = `INSERT INTO url (alias, original, expires_at, visits) VALUES ($1, $2, $3, $4)`
+	createQry       = `INSERT INTO url (alias, original, expires_at, visits) VALUES ($1, $2, $3, $4)`
+	getAliasQry     = `SELECT original FROM url WHERE alias = $1`
+	updateVisitsQry = `UPDATE url SET visits = visits + 1 WHERE alias = $1`
 )
 
 func (db *PgRepo) CrateAlias(ctx context.Context, original, alias string) error {
@@ -46,7 +48,33 @@ func (db *PgRepo) CrateAlias(ctx context.Context, original, alias string) error 
 	return nil
 }
 func (db *PgRepo) GetOrigURL(ctx context.Context, alias string) (string, error) {
-	return "", nil
+	var originalURL string
+	conn, err := db.DB.Acquire(ctx)
+	if err != nil {
+		return "", fmt.Errorf("connection acquire fail: %v", err)
+	}
+	defer conn.Release()
+
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return "", fmt.Errorf("begin transaction fail: %v", err)
+	}
+	defer func() {
+		txFinisher(ctx, tx, err)
+	}()
+
+	err = tx.QueryRow(ctx, getAliasQry, alias).Scan(&originalURL)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", errors.New(service.InvalidAliasErr)
+		}
+		return "", fmt.Errorf("query execution fail: %v", err)
+	}
+	_, err = tx.Exec(ctx, updateVisitsQry, alias)
+	if err != nil {
+		return "", fmt.Errorf("query execution fail: %v", err)
+	}
+	return originalURL, nil
 }
 
 func errorHandler(pgErr *pgconn.PgError) error {

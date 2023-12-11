@@ -10,8 +10,9 @@ type Config struct {
 }
 
 type AppCfg struct {
-	Host string `env:"APP_HOST" env-default:"localhost"`
-	Port string `env:"APP_PORT" env-default:"9090"`
+	Host    string `env:"APP_HOST" env-default:"localhost"`
+	Port    string `env:"APP_PORT" env-default:"9090"`
+	Address string `env:"APP_ADDRESS" env-default:"localhost:9090"`
 }
 
 type PostgresCfg struct {
