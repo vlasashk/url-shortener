@@ -1,10 +1,73 @@
 package pgrepo
 
-import "context"
+import (
+	"context"
+	"errors"
+	"fmt"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/rs/zerolog/log"
+	"github.com/vlasashk/url-shortener/internal/shortener/models/service"
+	"github.com/vlasashk/url-shortener/internal/shortener/models/urlalias"
+)
 
-func (db PgRepo) CrateAlias(ctx context.Context, url, alias string) error {
+const (
+	keyCollisionCode = "23505"
+)
+
+const (
+	createQry = `INSERT INTO url (alias, original, expires_at, visits) VALUES ($1, $2, $3, $4)`
+)
+
+func (db *PgRepo) CrateAlias(ctx context.Context, original, alias string) error {
+	newURL := urlalias.New(alias, original)
+	conn, err := db.DB.Acquire(ctx)
+	if err != nil {
+		return fmt.Errorf("connection acquire fail: %v", err)
+	}
+	defer conn.Release()
+
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin transaction fail: %v", err)
+	}
+	defer func() {
+		txFinisher(ctx, tx, err)
+	}()
+
+	if _, err = tx.Exec(ctx, createQry, newURL.Alias, newURL.Original, newURL.ExpiresAt, newURL.Visits); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			return errorHandler(pgErr)
+		}
+		return fmt.Errorf("exec transaction fail: %v", err)
+	}
+
 	return nil
 }
-func (db PgRepo) GetOrigURL(ctx context.Context, alias string) (string, error) {
+func (db *PgRepo) GetOrigURL(ctx context.Context, alias string) (string, error) {
 	return "", nil
+}
+
+func errorHandler(pgErr *pgconn.PgError) error {
+	switch pgErr.Code {
+	case keyCollisionCode:
+		return errors.New(service.AliasCollisionErr)
+	default:
+		return pgErr
+	}
+}
+
+func txFinisher(ctx context.Context, tx pgx.Tx, err error) {
+	if err != nil {
+		err = tx.Rollback(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("transaction rollback for register fail")
+		}
+	} else {
+		err = tx.Commit(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("transaction commit for register fail")
+		}
+	}
 }

@@ -3,7 +3,7 @@ package service
 import "context"
 
 type Repo interface {
-	CrateAlias(ctx context.Context, url, alias string) error
+	CrateAlias(ctx context.Context, original, alias string) error
 	GetOrigURL(ctx context.Context, alias string) (string, error)
 }
 
