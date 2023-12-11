@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS url
     visits     INTEGER
 );
 
+CREATE INDEX IF NOT EXISTS idx_original ON url(original);
+
 CREATE OR REPLACE FUNCTION update_expiration()
     RETURNS TRIGGER AS $$
 BEGIN
@@ -18,6 +20,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+DROP TRIGGER IF EXISTS update_expiration_trigger ON public.url;
 CREATE TRIGGER update_expiration_trigger
     BEFORE UPDATE OF visits ON url
     FOR EACH ROW

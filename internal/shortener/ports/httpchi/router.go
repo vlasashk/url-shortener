@@ -11,6 +11,7 @@ func New(h Handler) http.Handler {
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
+	r.Use(LoggerRequestID(h.log))
 	r.Use(middleware.URLFormat)
 	r.Use(middleware.CleanPath)
 	r.Use(middleware.Recoverer)
