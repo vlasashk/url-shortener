@@ -25,6 +25,7 @@ func (h Handler) CrateAlias(w http.ResponseWriter, r *http.Request) {
 	}
 	alias, err := h.s.CrateAlias(newUrl.Original)
 	if err != nil {
+		log.Error().Err(err).Send()
 		NewErr("alias creation fail").Send(w, r, http.StatusInternalServerError)
 		return
 	}
@@ -40,7 +41,7 @@ func (h Handler) GetOrigURL(w http.ResponseWriter, r *http.Request) {
 	originalURL, err := h.s.GetOrigURL(alias)
 	if err != nil {
 		log.Error().Err(err).Send()
-		NewErr("alias find fail").Send(w, r, http.StatusNotFound)
+		NewErr("alias search fail").Send(w, r, http.StatusNotFound)
 		return
 	}
 	log.Info().Str("id", alias).Msg("received successfully")

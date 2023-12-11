@@ -25,7 +25,7 @@ func (db *MemRepo) CrateAlias(ctx context.Context, original, alias string) error
 	}
 	db.mu.Lock()
 	defer db.mu.Unlock()
-	if _, ok := db.DB[alias]; !ok {
+	if _, ok := db.DB[alias]; ok {
 		return errors.New(service.AliasCollisionErr)
 	}
 	db.DB[alias] = original
