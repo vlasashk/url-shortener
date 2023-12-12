@@ -31,7 +31,7 @@ func (h Handler) CrateAlias(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Info().Msg("alias created successfully")
 	render.Status(r, http.StatusCreated)
-	render.JSON(w, r, alias)
+	render.JSON(w, r, AliasResp{Alias: alias})
 }
 
 func (h Handler) GetOrigURL(w http.ResponseWriter, r *http.Request) {

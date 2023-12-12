@@ -9,6 +9,10 @@ type ErrResp struct {
 	Error string `json:"error"`
 }
 
+type AliasResp struct {
+	Alias string `json:"alias"`
+}
+
 func NewErr(err string) ErrResp {
 	return ErrResp{
 		Error: err,
