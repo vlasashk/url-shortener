@@ -13,6 +13,10 @@ type AliasResp struct {
 	Alias string `json:"alias"`
 }
 
+type URLRequest struct {
+	Original string `json:"original" validate:"required,url"`
+}
+
 func NewErr(err string) ErrResp {
 	return ErrResp{
 		Error: err,

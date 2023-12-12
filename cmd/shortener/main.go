@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/rs/zerolog"
 	"github.com/vlasashk/url-shortener/config"
+	"github.com/vlasashk/url-shortener/internal/shortener/adapters/memrepo"
 	"github.com/vlasashk/url-shortener/internal/shortener/adapters/pgrepo"
 	"github.com/vlasashk/url-shortener/internal/shortener/models/logger"
 	"github.com/vlasashk/url-shortener/internal/shortener/models/service"
@@ -16,13 +17,20 @@ func main() {
 		log.Fatal().Err(err).Send()
 	}
 	log.Info().Msg("config parse success")
-
-	repo, err := pgrepo.New(cfg.Postgres)
-	if err != nil {
-		log.Fatal().Err(err).Send()
+	var repo service.Repo
+	switch cfg.App.Storage {
+	case "postgres":
+		pgRepo, err := pgrepo.New(cfg.Postgres)
+		if err != nil {
+			log.Fatal().Err(err).Send()
+		}
+		defer pgRepo.DB.Close()
+		repo = pgRepo
+		log.Info().Str("storage", "postgres").Msg("repository init success")
+	default:
+		repo = memrepo.New()
+		log.Info().Str("storage", "memory").Msg("repository init success")
 	}
-	defer repo.DB.Close()
-	log.Info().Msg("repository init success")
 
 	URLService := service.New(repo, cfg.App.Address)
 

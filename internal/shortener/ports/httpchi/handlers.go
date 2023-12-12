@@ -5,12 +5,11 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog"
-	"github.com/vlasashk/url-shortener/internal/shortener/models/urlalias"
 	"net/http"
 )
 
 func (h Handler) CrateAlias(w http.ResponseWriter, r *http.Request) {
-	newUrl := urlalias.URL{}
+	newUrl := URLRequest{}
 	log := *zerolog.Ctx(r.Context())
 	if err := render.DecodeJSON(r.Body, &newUrl); err != nil {
 		log.Error().Err(err).Send()
