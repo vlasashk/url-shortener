@@ -1,20 +1,13 @@
-package httpchi
+package errhandle
 
 import (
-	"github.com/go-chi/render"
 	"net/http"
+
+	"github.com/go-chi/render"
 )
 
 type ErrResp struct {
 	Error string `json:"error"`
-}
-
-type AliasResp struct {
-	Alias string `json:"alias"`
-}
-
-type URLRequest struct {
-	Original string `json:"original" validate:"required,url"`
 }
 
 func NewErr(err string) ErrResp {

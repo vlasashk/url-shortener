@@ -1,4 +1,4 @@
-package urlalias
+package converter
 
 import "time"
 

@@ -14,7 +14,7 @@ func (_m *Service) CrateAlias(url string) (string, error) {
 	ret := _m.Called(url)
 
 	if len(ret) == 0 {
-		panic("no return value specified for CrateAlias")
+		panic("no return value specified for SaveAlias")
 	}
 
 	var r0 string

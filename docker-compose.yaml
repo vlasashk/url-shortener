@@ -7,7 +7,7 @@ services:
     networks:
       - backend
     env_file:
-      - ./config/.env
+      - ./config/docker.env
     ports:
       - "5432:5432"
     healthcheck:
@@ -25,7 +25,7 @@ services:
     ports:
       - "9090:9090"
     env_file:
-      - ./config/.env
+      - ./config/docker.env
     depends_on:
       shortener_db:
         condition: service_healthy
