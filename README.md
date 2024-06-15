@@ -19,7 +19,6 @@ go test -v ./... -coverprofile=cover.out && go tool cover -html=cover.out -o cov
 ## Project information
 
 ### Restrictions/Peculiarities
-- Выбрать хранилище можно задав переменную окружения `APP_STORAGE_TYPE` в `.env` файле (`postgres` либо `memory`)
 - Alias имеет ограниченный срок жизни (1 месяц)
 - Каждые 100 посещений обновляют срок жизни alias на 1 месяц
 - Для очистки старых записей, у которых закончился срок жизни, можно написать cron job. Например что бы выполнялся запрос на удаление не актуальных записей раз в день/неделю/месяц
@@ -37,7 +36,6 @@ go test -v ./... -coverprofile=cover.out && go tool cover -html=cover.out -o cov
 #### URL manipulation
 - {POST} /alias - Создание alias
     ```
-    body
     {
         "original": "https://test.com",
     }

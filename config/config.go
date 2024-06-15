@@ -13,7 +13,6 @@ type AppCfg struct {
 	Host      string `env:"APP_HOST" env-default:"localhost"`
 	Port      string `env:"APP_PORT" env-default:"9090"`
 	Address   string `env:"APP_ADDRESS" env-default:"localhost:9090"`
-	Storage   string `env:"APP_STORAGE_TYPE" env-default:"localhost:9090"`
 	LoggerLVL string `env:"APP_LOG_LVL" env-default:"debug"`
 }
 
