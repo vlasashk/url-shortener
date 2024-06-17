@@ -27,7 +27,7 @@ func initMocks(t *testing.T) *mocksToUse {
 }
 
 func TestCrateAlias(t *testing.T) {
-	defaultURL := "http://test.com"
+	defaultURL := "https://test.com"
 	defaultAlias := "testAlias"
 
 	testCases := []struct {
@@ -42,7 +42,7 @@ func TestCrateAlias(t *testing.T) {
 		{
 			name: "CrateAliasSuccess",
 			storageOutput: func(m *mocksToUse) {
-				m.creator.On("SaveAlias", mock.Anything, defaultURL).Return(defaultAlias, nil).Once()
+				m.creator.On("CreateAlias", mock.Anything, defaultURL).Return(defaultAlias, nil).Once()
 			},
 			expectedCode: http.StatusCreated,
 			expectedResp: `{"alias":"testAlias"}`,
@@ -53,7 +53,7 @@ func TestCrateAlias(t *testing.T) {
 		{
 			name: "CrateAliasFail",
 			storageOutput: func(m *mocksToUse) {
-				m.creator.On("SaveAlias", mock.Anything, defaultURL).Return("", errors.New("any err")).Once()
+				m.creator.On("CreateAlias", mock.Anything, defaultURL).Return("", errors.New("any err")).Once()
 			},
 			expectedCode: http.StatusInternalServerError,
 			expectedResp: `{"error":"alias creation fail"}`,

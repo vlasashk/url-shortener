@@ -40,7 +40,7 @@ func New(address string,
 	}
 }
 
-func (s *UseCase) CrateAlias(ctx context.Context, url string) (string, error) {
+func (s *UseCase) CreateAlias(ctx context.Context, url string) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, reqTimeOut)
 	defer cancel()
 

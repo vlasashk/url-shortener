@@ -29,7 +29,7 @@ func initMocks(t *testing.T) *mocksToUse {
 }
 
 func TestGetAlias(t *testing.T) {
-	defaultURL := "http://test.com"
+	defaultURL := "https://test.com"
 	defaultAlias := "testAlias"
 
 	testCases := []struct {

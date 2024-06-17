@@ -12,7 +12,7 @@ import (
 
 //go:generate mockery --name=AliasCreator
 type AliasCreator interface {
-	CrateAlias(ctx context.Context, url string) (string, error)
+	CreateAlias(ctx context.Context, url string) (string, error)
 }
 
 type Handler struct {
@@ -43,7 +43,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	alias, err := h.creator.CrateAlias(r.Context(), newURL.Original)
+	alias, err := h.creator.CreateAlias(r.Context(), newURL.Original)
 	if err != nil {
 		log.Error().Err(err).Send()
 		errhandle.NewErr("alias creation fail").Send(w, r, http.StatusInternalServerError)

@@ -13,12 +13,12 @@ type AliasCreator struct {
 	mock.Mock
 }
 
-// CrateAlias provides a mock function with given fields: ctx, url
-func (_m *AliasCreator) CrateAlias(ctx context.Context, url string) (string, error) {
+// CreateAlias provides a mock function with given fields: ctx, url
+func (_m *AliasCreator) CreateAlias(ctx context.Context, url string) (string, error) {
 	ret := _m.Called(ctx, url)
 
 	if len(ret) == 0 {
-		panic("no return value specified for CrateAlias")
+		panic("no return value specified for CreateAlias")
 	}
 
 	var r0 string
