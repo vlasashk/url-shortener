@@ -41,7 +41,7 @@ func New(address string,
 }
 
 func (s *UseCase) CrateAlias(ctx context.Context, url string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), reqTimeOut)
+	ctx, cancel := context.WithTimeout(ctx, reqTimeOut)
 	defer cancel()
 
 	alias := aliasgen.Generate()
@@ -60,7 +60,7 @@ func (s *UseCase) CrateAlias(ctx context.Context, url string) (string, error) {
 }
 
 func (s *UseCase) GetOrigURL(ctx context.Context, alias string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), reqTimeOut)
+	ctx, cancel := context.WithTimeout(ctx, reqTimeOut)
 	defer cancel()
 
 	return s.originalProvider.GetOrigURL(ctx, alias)

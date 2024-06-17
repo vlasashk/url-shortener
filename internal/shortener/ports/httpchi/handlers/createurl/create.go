@@ -28,22 +28,22 @@ func New(log zerolog.Logger, creator AliasCreator) *Handler {
 }
 
 func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var newUrl urlRequest
+	var newURL urlRequest
 	log := *zerolog.Ctx(r.Context())
 
-	if err := render.DecodeJSON(r.Body, &newUrl); err != nil {
+	if err := render.DecodeJSON(r.Body, &newURL); err != nil {
 		log.Error().Err(err).Send()
 		errhandle.NewErr("bad JSON").Send(w, r, http.StatusBadRequest)
 		return
 	}
 
-	if err := validator.New().Struct(newUrl); err != nil {
+	if err := validator.New().Struct(newURL); err != nil {
 		log.Error().Err(err).Send()
 		errhandle.NewErr("invalid JSON").Send(w, r, http.StatusUnprocessableEntity)
 		return
 	}
 
-	alias, err := h.creator.CrateAlias(r.Context(), newUrl.Original)
+	alias, err := h.creator.CrateAlias(r.Context(), newURL.Original)
 	if err != nil {
 		log.Error().Err(err).Send()
 		errhandle.NewErr("alias creation fail").Send(w, r, http.StatusInternalServerError)

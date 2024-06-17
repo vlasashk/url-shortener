@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"context"
+
 	"github.com/rs/zerolog"
 	"github.com/vlasashk/url-shortener/config"
 	"github.com/vlasashk/url-shortener/internal/shortener/adapters/pgrepo"
@@ -14,13 +16,13 @@ type Resources struct {
 	stopResources []func() error
 }
 
-func NewResources(cfg config.Config) (Resources, error) {
+func NewResources(ctx context.Context, cfg config.Config) (Resources, error) {
 	log, err := logger.New(cfg.App.LoggerLVL)
 	if err != nil {
 		return Resources{}, err
 	}
 
-	pgRepo, err := pgrepo.New(cfg.Postgres)
+	pgRepo, err := pgrepo.New(ctx, cfg.Postgres, log)
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}

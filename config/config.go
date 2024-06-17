@@ -17,12 +17,12 @@ type AppCfg struct {
 }
 
 type PostgresCfg struct {
-	Username     string `env:"POSTGRES_USER" env-default:"postgres"`
-	Password     string `env:"POSTGRES_PASSWORD" env-default:"postgres"`
-	Port         string `env:"PG_PORT" env-default:"5432"`
-	Host         string `env:"POSTGRES_HOST" env-default:"localhost"`
-	NameDB       string `env:"POSTGRES_DB" env-default:"postgres"`
-	InitFilePath string `env:"PG_INIT_SQL_PATH" env-default:"./migration/url.sql"`
+	Username   string `env:"POSTGRES_USER" env-default:"postgres"`
+	Password   string `env:"POSTGRES_PASSWORD" env-default:"postgres"`
+	Port       string `env:"PG_PORT" env-default:"5432"`
+	Host       string `env:"POSTGRES_HOST" env-default:"localhost"`
+	NameDB     string `env:"POSTGRES_DB" env-default:"postgres"`
+	Migrations string `env:"DB_MIGRATION_PATH" env-default:"./migrations"`
 }
 
 func New() (Config, error) {

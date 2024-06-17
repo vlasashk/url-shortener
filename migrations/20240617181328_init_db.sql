@@ -1,3 +1,5 @@
+-- +goose Up
+-- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS url
 (
     alias      VARCHAR(10) PRIMARY KEY,
@@ -18,12 +20,14 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+-- +goose StatementEnd
 
-
+-- +goose Down
+-- +goose StatementBegin
 DROP TRIGGER IF EXISTS update_expiration_trigger ON public.url;
 CREATE TRIGGER update_expiration_trigger
     BEFORE UPDATE OF visits ON url
     FOR EACH ROW
     WHEN (OLD.visits IS DISTINCT FROM NEW.visits)
 EXECUTE FUNCTION update_expiration();
-
+-- +goose StatementEnd

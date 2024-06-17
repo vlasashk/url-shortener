@@ -1,0 +1,911 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>converter: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/vlasashk/url-shortener/internal/shortener/adapters/pgrepo/converter/url.go (0.0%)</option>
+				
+				<option value="file1">github.com/vlasashk/url-shortener/internal/shortener/adapters/pgrepo/repo.go (0.0%)</option>
+				
+				<option value="file2">github.com/vlasashk/url-shortener/internal/shortener/mocks/Service.go (0.0%)</option>
+				
+				<option value="file3">github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/errhandle/errhandle.go (100.0%)</option>
+				
+				<option value="file4">github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/handlers/createurl/create.go (36.8%)</option>
+				
+				<option value="file5">github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/handlers/createurl/mocks/AliasCreator.go (26.3%)</option>
+				
+				<option value="file6">github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/handlers/origurl/get.go (90.0%)</option>
+				
+				<option value="file7">github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/handlers/origurl/mocks/originalProvider.go (78.9%)</option>
+				
+				<option value="file8">github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/middlewares/logging.go (0.0%)</option>
+				
+				<option value="file9">github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/middlewares/writer.go (0.0%)</option>
+				
+				<option value="file10">github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/router.go (0.0%)</option>
+				
+				<option value="file11">github.com/vlasashk/url-shortener/internal/shortener/resources/resources.go (0.0%)</option>
+				
+				<option value="file12">github.com/vlasashk/url-shortener/internal/shortener/service.go (0.0%)</option>
+				
+				<option value="file13">github.com/vlasashk/url-shortener/internal/shortener/usecase/usecase.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package converter
+
+import "time"
+
+type URL struct {
+        Alias     string    `json:"-"`
+        Original  string    `json:"original" validate:"required,url"`
+        ExpiresAt time.Time `json:"-"`
+        Visits    uint      `json:"-"`
+}
+
+func New(alias, original string) URL <span class="cov0" title="0">{
+        return URL{
+                Alias:     alias,
+                Original:  original,
+                ExpiresAt: time.Now().AddDate(0, 1, 0),
+                Visits:    0,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package pgrepo
+
+import (
+        "context"
+        "errors"
+        "fmt"
+
+        "github.com/jackc/pgx/v5"
+        "github.com/jackc/pgx/v5/pgconn"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "github.com/rs/zerolog"
+        "github.com/rs/zerolog/log"
+        "github.com/vlasashk/url-shortener/config"
+        "github.com/vlasashk/url-shortener/internal/shortener/adapters/pgrepo/converter"
+        "github.com/vlasashk/url-shortener/internal/shortener/models"
+        "github.com/vlasashk/url-shortener/pkg/migration"
+        "github.com/vlasashk/url-shortener/pkg/pgconnect"
+)
+
+const (
+        keyCollisionCode = "23505"
+)
+
+const (
+        createQry       = `INSERT INTO url (alias, original, expires_at, visits) VALUES ($1, $2, $3, $4)`
+        getAliasQry     = `SELECT original FROM url WHERE alias = $1`
+        updateVisitsQry = `UPDATE url SET visits = visits + 1 WHERE alias = $1`
+)
+
+type PgRepo struct {
+        DB *pgxpool.Pool
+}
+
+func New(ctx context.Context, cfg config.PostgresCfg, logger zerolog.Logger) (*PgRepo, error) <span class="cov0" title="0">{
+        url := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
+                cfg.Username,
+                cfg.Password,
+                cfg.Host,
+                cfg.Port,
+                cfg.NameDB)
+
+        dbPool, err := pgconnect.Connect(ctx, url, logger)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("unable to create connection pool: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">if err = migration.Up(dbPool, cfg.Migrations); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("unable to apply migrations: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;PgRepo{dbPool}, nil</span>
+}
+
+func (db *PgRepo) SaveAlias(ctx context.Context, original, alias string) error <span class="cov0" title="0">{
+        newURL := converter.New(alias, original)
+
+        conn, err := db.DB.Acquire(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("connection acquire fail: %v", err)
+        }</span>
+        <span class="cov0" title="0">defer conn.Release()
+
+        tx, err := conn.Begin(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("begin transaction fail: %v", err)
+        }</span>
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+                txFinisher(ctx, tx, err)
+        }</span>()
+
+        <span class="cov0" title="0">if _, err = tx.Exec(ctx, createQry, newURL.Alias, newURL.Original, newURL.ExpiresAt, newURL.Visits); err != nil </span><span class="cov0" title="0">{
+                var pgErr *pgconn.PgError
+                if errors.As(err, &amp;pgErr) </span><span class="cov0" title="0">{
+                        return errorHandler(pgErr)
+                }</span>
+                <span class="cov0" title="0">return fmt.Errorf("exec transaction fail: %v", err)</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+func (db *PgRepo) GetOrigURL(ctx context.Context, alias string) (string, error) <span class="cov0" title="0">{
+        var originalURL string
+
+        conn, err := db.DB.Acquire(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("connection acquire fail: %v", err)
+        }</span>
+        <span class="cov0" title="0">defer conn.Release()
+
+        tx, err := conn.Begin(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("begin transaction fail: %v", err)
+        }</span>
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+                txFinisher(ctx, tx, err)
+        }</span>()
+
+        <span class="cov0" title="0">err = tx.QueryRow(ctx, getAliasQry, alias).Scan(&amp;originalURL)
+        if err != nil </span><span class="cov0" title="0">{
+                if errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                        return "", models.ErrInvalidAlias
+                }</span>
+                <span class="cov0" title="0">return "", fmt.Errorf("query execution fail: %v", err)</span>
+        }
+        <span class="cov0" title="0">_, err = tx.Exec(ctx, updateVisitsQry, alias)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("query execution fail: %v", err)
+        }</span>
+        <span class="cov0" title="0">return originalURL, nil</span>
+}
+
+func errorHandler(pgErr *pgconn.PgError) error <span class="cov0" title="0">{
+        switch pgErr.Code </span>{
+        case keyCollisionCode:<span class="cov0" title="0">
+                return models.ErrAliasCollision</span>
+        default:<span class="cov0" title="0">
+                return pgErr</span>
+        }
+}
+
+func txFinisher(ctx context.Context, tx pgx.Tx, err error) <span class="cov0" title="0">{
+        if err != nil </span><span class="cov0" title="0">{
+                err = tx.Rollback(ctx)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Error().Err(err).Msg("transaction rollback for register fail")
+                }</span>
+        } else<span class="cov0" title="0"> {
+                err = tx.Commit(ctx)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Error().Err(err).Msg("transaction commit for register fail")
+                }</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// Code generated by mockery v2.38.0. DO NOT EDIT.
+
+package mocks
+
+import mock "github.com/stretchr/testify/mock"
+
+// Service is an autogenerated mock type for the Service type
+type Service struct {
+        mock.Mock
+}
+
+// CrateAlias provides a mock function with given fields: url
+func (_m *Service) CrateAlias(url string) (string, error) <span class="cov0" title="0">{
+        ret := _m.Called(url)
+
+        if len(ret) == 0 </span><span class="cov0" title="0">{
+                panic("no return value specified for SaveAlias")</span>
+        }
+
+        <span class="cov0" title="0">var r0 string
+        var r1 error
+        if rf, ok := ret.Get(0).(func(string) (string, error)); ok </span><span class="cov0" title="0">{
+                return rf(url)
+        }</span>
+        <span class="cov0" title="0">if rf, ok := ret.Get(0).(func(string) string); ok </span><span class="cov0" title="0">{
+                r0 = rf(url)
+        }</span> else<span class="cov0" title="0"> {
+                r0 = ret.Get(0).(string)
+        }</span>
+
+        <span class="cov0" title="0">if rf, ok := ret.Get(1).(func(string) error); ok </span><span class="cov0" title="0">{
+                r1 = rf(url)
+        }</span> else<span class="cov0" title="0"> {
+                r1 = ret.Error(1)
+        }</span>
+
+        <span class="cov0" title="0">return r0, r1</span>
+}
+
+// GetOrigURL provides a mock function with given fields: alias
+func (_m *Service) GetOrigURL(alias string) (string, error) <span class="cov0" title="0">{
+        ret := _m.Called(alias)
+
+        if len(ret) == 0 </span><span class="cov0" title="0">{
+                panic("no return value specified for GetOrigURL")</span>
+        }
+
+        <span class="cov0" title="0">var r0 string
+        var r1 error
+        if rf, ok := ret.Get(0).(func(string) (string, error)); ok </span><span class="cov0" title="0">{
+                return rf(alias)
+        }</span>
+        <span class="cov0" title="0">if rf, ok := ret.Get(0).(func(string) string); ok </span><span class="cov0" title="0">{
+                r0 = rf(alias)
+        }</span> else<span class="cov0" title="0"> {
+                r0 = ret.Get(0).(string)
+        }</span>
+
+        <span class="cov0" title="0">if rf, ok := ret.Get(1).(func(string) error); ok </span><span class="cov0" title="0">{
+                r1 = rf(alias)
+        }</span> else<span class="cov0" title="0"> {
+                r1 = ret.Error(1)
+        }</span>
+
+        <span class="cov0" title="0">return r0, r1</span>
+}
+
+// NewService creates a new instance of Service. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewService(t interface {
+        mock.TestingT
+        Cleanup(func())
+}) *Service <span class="cov0" title="0">{
+        mock := &amp;Service{}
+        mock.Mock.Test(t)
+
+        t.Cleanup(func() </span><span class="cov0" title="0">{ mock.AssertExpectations(t) }</span>)
+
+        <span class="cov0" title="0">return mock</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package errhandle
+
+import (
+        "net/http"
+
+        "github.com/go-chi/render"
+)
+
+type ErrResp struct {
+        Error string `json:"error"`
+}
+
+func NewErr(err string) ErrResp <span class="cov10" title="6">{
+        return ErrResp{
+                Error: err,
+        }
+}</span>
+
+func (resp ErrResp) Send(w http.ResponseWriter, r *http.Request, status int) <span class="cov10" title="6">{
+        render.Status(r, status)
+        render.JSON(w, r, resp)
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package createurl
+
+import (
+        "context"
+        "net/http"
+
+        "github.com/go-chi/render"
+        "github.com/go-playground/validator/v10"
+        "github.com/rs/zerolog"
+        "github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/errhandle"
+)
+
+//go:generate mockery --name=AliasCreator
+type AliasCreator interface {
+        CrateAlias(ctx context.Context, url string) (string, error)
+}
+
+type Handler struct {
+        creator AliasCreator
+        log     zerolog.Logger
+}
+
+func New(log zerolog.Logger, creator AliasCreator) *Handler <span class="cov10" title="4">{
+        return &amp;Handler{
+                creator: creator,
+                log:     log,
+        }
+}</span>
+
+func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) <span class="cov10" title="4">{
+        var newUrl urlRequest
+        log := *zerolog.Ctx(r.Context())
+
+        if err := render.DecodeJSON(r.Body, &amp;newUrl); err != nil </span><span class="cov10" title="4">{
+                log.Error().Err(err).Send()
+                errhandle.NewErr("bad JSON").Send(w, r, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov0" title="0">if err := validator.New().Struct(newUrl); err != nil </span><span class="cov0" title="0">{
+                log.Error().Err(err).Send()
+                errhandle.NewErr("invalid JSON").Send(w, r, http.StatusUnprocessableEntity)
+                return
+        }</span>
+
+        <span class="cov0" title="0">alias, err := h.creator.CrateAlias(r.Context(), newUrl.Original)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Error().Err(err).Send()
+                errhandle.NewErr("alias creation fail").Send(w, r, http.StatusInternalServerError)
+                return
+        }</span>
+
+        <span class="cov0" title="0">log.Debug().Str("alias", alias).Msg("alias created successfully")
+        render.Status(r, http.StatusCreated)
+        render.JSON(w, r, aliasResp{Alias: alias})</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">// Code generated by mockery v2.42.0. DO NOT EDIT.
+
+package mocks
+
+import (
+        context "context"
+
+        mock "github.com/stretchr/testify/mock"
+)
+
+// AliasCreator is an autogenerated mock type for the AliasCreator type
+type AliasCreator struct {
+        mock.Mock
+}
+
+// CrateAlias provides a mock function with given fields: ctx, url
+func (_m *AliasCreator) CrateAlias(ctx context.Context, url string) (string, error) <span class="cov0" title="0">{
+        ret := _m.Called(ctx, url)
+
+        if len(ret) == 0 </span><span class="cov0" title="0">{
+                panic("no return value specified for CrateAlias")</span>
+        }
+
+        <span class="cov0" title="0">var r0 string
+        var r1 error
+        if rf, ok := ret.Get(0).(func(context.Context, string) (string, error)); ok </span><span class="cov0" title="0">{
+                return rf(ctx, url)
+        }</span>
+        <span class="cov0" title="0">if rf, ok := ret.Get(0).(func(context.Context, string) string); ok </span><span class="cov0" title="0">{
+                r0 = rf(ctx, url)
+        }</span> else<span class="cov0" title="0"> {
+                r0 = ret.Get(0).(string)
+        }</span>
+
+        <span class="cov0" title="0">if rf, ok := ret.Get(1).(func(context.Context, string) error); ok </span><span class="cov0" title="0">{
+                r1 = rf(ctx, url)
+        }</span> else<span class="cov0" title="0"> {
+                r1 = ret.Error(1)
+        }</span>
+
+        <span class="cov0" title="0">return r0, r1</span>
+}
+
+// NewAliasCreator creates a new instance of AliasCreator. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewAliasCreator(t interface {
+        mock.TestingT
+        Cleanup(func())
+}) *AliasCreator <span class="cov10" title="4">{
+        mock := &amp;AliasCreator{}
+        mock.Mock.Test(t)
+
+        t.Cleanup(func() </span><span class="cov10" title="4">{ mock.AssertExpectations(t) }</span>)
+
+        <span class="cov10" title="4">return mock</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package origurl
+
+import (
+        "context"
+        "net/http"
+
+        "github.com/go-chi/chi/v5"
+        "github.com/rs/zerolog"
+        "github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/errhandle"
+)
+
+//go:generate mockery --name=OriginalProvider
+type OriginalProvider interface {
+        GetOrigURL(ctx context.Context, alias string) (string, error)
+}
+
+type Handler struct {
+        provider OriginalProvider
+        log      zerolog.Logger
+}
+
+func New(log zerolog.Logger, provider OriginalProvider) *Handler <span class="cov10" title="2">{
+        return &amp;Handler{
+                provider: provider,
+                log:      log,
+        }
+}</span>
+
+func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) <span class="cov10" title="2">{
+        log := *zerolog.Ctx(r.Context())
+
+        alias := chi.URLParam(r, "alias")
+        log.Debug().Str("alias", alias).Msg("alias to get")
+
+        originalURL, err := h.provider.GetOrigURL(r.Context(), alias)
+        if err != nil </span><span class="cov10" title="2">{
+                log.Error().Err(err).Send()
+                errhandle.NewErr("alias search fail").Send(w, r, http.StatusNotFound)
+                return
+        }</span>
+
+        <span class="cov0" title="0">http.Redirect(w, r, originalURL, http.StatusFound)</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">// Code generated by mockery v2.42.0. DO NOT EDIT.
+
+package mocks
+
+import (
+        context "context"
+
+        mock "github.com/stretchr/testify/mock"
+)
+
+// OriginalProvider is an autogenerated mock type for the OriginalProvider type
+type OriginalProvider struct {
+        mock.Mock
+}
+
+// GetOrigURL provides a mock function with given fields: ctx, alias
+func (_m *OriginalProvider) GetOrigURL(ctx context.Context, alias string) (string, error) <span class="cov10" title="2">{
+        ret := _m.Called(ctx, alias)
+
+        if len(ret) == 0 </span><span class="cov0" title="0">{
+                panic("no return value specified for GetOrigURL")</span>
+        }
+
+        <span class="cov10" title="2">var r0 string
+        var r1 error
+        if rf, ok := ret.Get(0).(func(context.Context, string) (string, error)); ok </span><span class="cov0" title="0">{
+                return rf(ctx, alias)
+        }</span>
+        <span class="cov10" title="2">if rf, ok := ret.Get(0).(func(context.Context, string) string); ok </span><span class="cov0" title="0">{
+                r0 = rf(ctx, alias)
+        }</span> else<span class="cov10" title="2"> {
+                r0 = ret.Get(0).(string)
+        }</span>
+
+        <span class="cov10" title="2">if rf, ok := ret.Get(1).(func(context.Context, string) error); ok </span><span class="cov0" title="0">{
+                r1 = rf(ctx, alias)
+        }</span> else<span class="cov10" title="2"> {
+                r1 = ret.Error(1)
+        }</span>
+
+        <span class="cov10" title="2">return r0, r1</span>
+}
+
+// NewOriginalProvider creates a new instance of OriginalProvider. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewOriginalProvider(t interface {
+        mock.TestingT
+        Cleanup(func())
+}) *OriginalProvider <span class="cov10" title="2">{
+        mock := &amp;OriginalProvider{}
+        mock.Mock.Test(t)
+
+        t.Cleanup(func() </span><span class="cov10" title="2">{ mock.AssertExpectations(t) }</span>)
+
+        <span class="cov10" title="2">return mock</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package middlewares
+
+import (
+        "bytes"
+        "errors"
+        "net/http"
+        "time"
+
+        "github.com/go-chi/chi/v5/middleware"
+        "github.com/rs/zerolog"
+)
+
+func LoggingMiddleware(logger zerolog.Logger) func(next http.Handler) http.Handler <span class="cov0" title="0">{
+        return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
+                return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                        logger.Info().
+                                Str("method", r.Method).
+                                Str("path", r.URL.Path).
+                                Str("query", r.URL.RawQuery).
+                                Any("headers", r.Header).
+                                Str("request_id", middleware.GetReqID(r.Context())).
+                                Send()
+                        ww := &amp;statusWriter{
+                                statusCode: http.StatusOK,
+                                err:        bytes.NewBuffer(nil),
+                                w:          w,
+                        }
+
+                        defer func(start time.Time) </span><span class="cov0" title="0">{
+                                logResp := logger.With().
+                                        Int("status_code", ww.statusCode).
+                                        Dur("duration", time.Since(start)).
+                                        Any("headers", ww.Header()).
+                                        Logger()
+                                switch </span>{
+                                case ww.statusCode &gt;= 400 &amp;&amp; ww.statusCode &lt; 500:<span class="cov0" title="0">
+                                        logResp.Warn().Err(errors.New(ww.err.String())).Send()</span>
+                                case ww.statusCode &gt;= 500:<span class="cov0" title="0">
+                                        logResp.Error().Err(errors.New(ww.err.String())).Send()</span>
+                                default:<span class="cov0" title="0">
+                                        logResp.Info().Send()</span>
+                                }
+                        }(time.Now())
+
+                        <span class="cov0" title="0">next.ServeHTTP(ww, r.WithContext(logger.WithContext(r.Context())))</span>
+                })
+        }
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package middlewares
+
+import (
+        "bytes"
+        "net/http"
+)
+
+type statusWriter struct {
+        w          http.ResponseWriter
+        err        *bytes.Buffer
+        statusCode int
+}
+
+func (sw *statusWriter) Header() http.Header <span class="cov0" title="0">{
+        return sw.w.Header()
+}</span>
+
+func (sw *statusWriter) Write(bytes []byte) (int, error) <span class="cov0" title="0">{
+        sw.err.Write(bytes)
+        return sw.w.Write(bytes)
+}</span>
+
+func (sw *statusWriter) WriteHeader(statusCode int) <span class="cov0" title="0">{
+        sw.statusCode = statusCode
+        sw.w.WriteHeader(statusCode)
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package httpchi
+
+import (
+        "net"
+        "net/http"
+
+        "github.com/go-chi/chi/v5"
+        "github.com/go-chi/chi/v5/middleware"
+        "github.com/vlasashk/url-shortener/config"
+        "github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/handlers/createurl"
+        "github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/handlers/origurl"
+        "github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi/middlewares"
+        "github.com/vlasashk/url-shortener/internal/shortener/resources"
+)
+
+func New(cfg config.Config, res resources.Resources) *http.Server <span class="cov0" title="0">{
+        r := chi.NewRouter()
+
+        r.Use(middleware.RequestID)
+        r.Use(middlewares.LoggingMiddleware(res.Log))
+        r.Use(middleware.URLFormat)
+        r.Use(middleware.CleanPath)
+        r.Use(middleware.Recoverer)
+
+        r.Get("/{alias}", origurl.New(res.Log, res.UseCase).ServeHTTP)
+        r.Post("/alias", createurl.New(res.Log, res.UseCase).ServeHTTP)
+
+        return &amp;http.Server{
+                Addr:    net.JoinHostPort(cfg.App.Host, cfg.App.Port),
+                Handler: r,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package resources
+
+import (
+        "context"
+
+        "github.com/rs/zerolog"
+        "github.com/vlasashk/url-shortener/config"
+        "github.com/vlasashk/url-shortener/internal/shortener/adapters/pgrepo"
+        "github.com/vlasashk/url-shortener/internal/shortener/usecase"
+        "github.com/vlasashk/url-shortener/pkg/logger"
+)
+
+type Resources struct {
+        Log           zerolog.Logger
+        UseCase       *usecase.UseCase
+        stopResources []func() error
+}
+
+func NewResources(ctx context.Context, cfg config.Config) (Resources, error) <span class="cov0" title="0">{
+        log, err := logger.New(cfg.App.LoggerLVL)
+        if err != nil </span><span class="cov0" title="0">{
+                return Resources{}, err
+        }</span>
+
+        <span class="cov0" title="0">pgRepo, err := pgrepo.New(ctx, cfg.Postgres, log)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal().Err(err).Send()
+        }</span>
+
+        <span class="cov0" title="0">return Resources{
+                Log: log,
+                UseCase: usecase.New(
+                        cfg.App.Address,
+                        pgRepo,
+                        pgRepo,
+                ),
+                stopResources: []func() error{
+                        func() error </span><span class="cov0" title="0">{
+                                pgRepo.DB.Close()
+                                return nil
+                        }</span>,
+                },
+        }, nil
+}
+
+func (r Resources) Stop() <span class="cov0" title="0">{
+        for _, stop := range r.stopResources </span><span class="cov0" title="0">{
+                if err := stop(); err != nil </span><span class="cov0" title="0">{
+                        r.Log.Error().Err(err).Send()
+                }</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package shortener
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "net"
+        "net/http"
+        "os/signal"
+        "syscall"
+        "time"
+
+        "github.com/rs/zerolog/log"
+        "github.com/vlasashk/url-shortener/config"
+        "github.com/vlasashk/url-shortener/internal/shortener/ports/httpchi"
+        "github.com/vlasashk/url-shortener/internal/shortener/resources"
+        "golang.org/x/sync/errgroup"
+)
+
+const gracefulTimeout = 10 * time.Second
+
+func Run(ctx context.Context, cfg config.Config) error <span class="cov0" title="0">{
+        ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+        defer cancel()
+
+        res, err := resources.NewResources(ctx, cfg)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">defer res.Stop()
+
+        srv := httpchi.New(cfg, res)
+
+        g, gCtx := errgroup.WithContext(ctx)
+        g.Go(func() error </span><span class="cov0" title="0">{
+                log.Info().Msg(fmt.Sprintf("starting server: %s", net.JoinHostPort(cfg.App.Host, cfg.App.Port)))
+                if err = srv.ListenAndServe(); err != nil &amp;&amp; !errors.Is(err, http.ErrServerClosed) </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">return nil</span>
+        })
+        <span class="cov0" title="0">g.Go(func() error </span><span class="cov0" title="0">{
+                &lt;-gCtx.Done()
+                log.Info().Msg("Got interruption signal")
+                shutDownCtx, cancel := context.WithTimeout(context.Background(), gracefulTimeout)
+                defer cancel()
+                return srv.Shutdown(shutDownCtx)
+        }</span>)
+
+        <span class="cov0" title="0">if err = g.Wait(); err != nil </span><span class="cov0" title="0">{
+                log.Error().Err(err).Send()
+                return err
+        }</span>
+
+        <span class="cov0" title="0">log.Info().Msg("server was gracefully shut down")
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package usecase
+
+import (
+        "context"
+        "errors"
+        "path"
+        "time"
+
+        "github.com/vlasashk/url-shortener/internal/shortener/models"
+        "github.com/vlasashk/url-shortener/pkg/aliasgen"
+)
+
+const (
+        reqTimeOut = 3 * time.Second
+)
+
+//go:generate mockery --name=AliasSaver
+type AliasSaver interface {
+        SaveAlias(ctx context.Context, original, alias string) error
+}
+
+//go:generate mockery --name=OriginalProvider
+type OriginalProvider interface {
+        GetOrigURL(ctx context.Context, alias string) (string, error)
+}
+
+type UseCase struct {
+        address          string
+        aliasSaver       AliasSaver
+        originalProvider OriginalProvider
+}
+
+func New(address string,
+        aliasSaver AliasSaver,
+        originalProvider OriginalProvider) *UseCase <span class="cov0" title="0">{
+        return &amp;UseCase{
+                address:          address,
+                aliasSaver:       aliasSaver,
+                originalProvider: originalProvider,
+        }
+}</span>
+
+func (s *UseCase) CrateAlias(ctx context.Context, url string) (string, error) <span class="cov0" title="0">{
+        ctx, cancel := context.WithTimeout(context.Background(), reqTimeOut)
+        defer cancel()
+
+        alias := aliasgen.Generate()
+
+        err := s.aliasSaver.SaveAlias(ctx, url, alias)
+        for err != nil &amp;&amp; errors.Is(err, models.ErrAliasCollision) </span><span class="cov0" title="0">{
+                alias = aliasgen.Generate()
+                err = s.aliasSaver.SaveAlias(ctx, url, alias)
+        }</span>
+
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">return path.Join(s.address, alias), nil</span>
+}
+
+func (s *UseCase) GetOrigURL(ctx context.Context, alias string) (string, error) <span class="cov0" title="0">{
+        ctx, cancel := context.WithTimeout(context.Background(), reqTimeOut)
+        defer cancel()
+
+        return s.originalProvider.GetOrigURL(ctx, alias)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
