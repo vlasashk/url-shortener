@@ -19,7 +19,7 @@ import (
 
 const gracefulTimeout = 10 * time.Second
 
-func Run(ctx context.Context, cfg config.Config) error {
+func Run(ctx context.Context, cfg config.ShortenerCfg) error {
 	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 

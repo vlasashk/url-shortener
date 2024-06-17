@@ -1,8 +1,8 @@
 FROM golang:1.22-alpine as builder
 WORKDIR /service
-COPY go.sum go.mod ./
+COPY ../../go.sum go.mod ./
 RUN go mod download
-COPY . /service
+COPY ../.. /service
 RUN go build -o app ./cmd/shortener/main.go
 
 FROM alpine

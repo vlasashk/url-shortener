@@ -16,7 +16,7 @@ type Resources struct {
 	stopResources []func() error
 }
 
-func NewResources(ctx context.Context, cfg config.Config) (Resources, error) {
+func NewResources(ctx context.Context, cfg config.ShortenerCfg) (Resources, error) {
 	log, err := logger.New(cfg.App.LoggerLVL)
 	if err != nil {
 		return Resources{}, err

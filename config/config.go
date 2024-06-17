@@ -4,7 +4,7 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-type Config struct {
+type ShortenerCfg struct {
 	App      AppCfg
 	Postgres PostgresCfg
 }
@@ -25,10 +25,10 @@ type PostgresCfg struct {
 	Migrations string `env:"DB_MIGRATION_PATH" env-default:"./migrations"`
 }
 
-func New() (Config, error) {
-	var newConfig Config
+func NewShortener() (ShortenerCfg, error) {
+	var newConfig ShortenerCfg
 	if err := cleanenv.ReadEnv(&newConfig); err != nil {
-		return Config{}, err
+		return ShortenerCfg{}, err
 	}
 	return newConfig, nil
 }

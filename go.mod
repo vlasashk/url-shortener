@@ -9,6 +9,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/pressly/goose/v3 v3.20.0
+	github.com/robfig/cron/v3 v3.0.0
 	github.com/rs/zerolog v1.31.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/sync v0.7.0

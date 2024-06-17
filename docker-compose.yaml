@@ -1,4 +1,3 @@
-version: '3.7'
 services:
   shortener_db:
     image: postgres:latest
@@ -20,10 +19,30 @@ services:
   app:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: cmd/shortener/Dockerfile
     restart: always
     ports:
       - "9090:9090"
+    env_file:
+      - ./config/docker.env
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "--quiet", "app:9090/healthz" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+      start_interval: 3s
+    depends_on:
+      shortener_db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  cronjob:
+    build:
+      context: .
+      dockerfile: cmd/cronjob/Dockerfile
+    restart: always
     env_file:
       - ./config/docker.env
     depends_on:
@@ -31,6 +50,7 @@ services:
         condition: service_healthy
     networks:
       - backend
+
 volumes:
   shortener_data:
 
