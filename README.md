@@ -2,6 +2,7 @@
 ## Build
 #### Prerequisites
 - docker
+- make
 
 1. Clone project:
 ```
@@ -10,11 +11,11 @@ cd url-shortener
 ```
 2. Run:
 ```
-docker compose up --build
+make run-all
 ```
 3. Test:
 ```
-go test -v ./... -coverprofile=cover.out && go tool cover -html=cover.out -o cover.html
+make unit-test
 ```
 ## Project information
 
