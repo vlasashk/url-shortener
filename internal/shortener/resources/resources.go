@@ -36,7 +36,7 @@ func NewResources(ctx context.Context, cfg config.ShortenerCfg) (Resources, erro
 		),
 		stopResources: []func() error{
 			func() error {
-				pgRepo.DB.Close()
+				pgRepo.Pool.Close()
 				return nil
 			},
 		},

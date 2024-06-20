@@ -28,7 +28,7 @@ const (
 )
 
 type PgRepo struct {
-	DB *pgxpool.Pool
+	Pool *pgxpool.Pool
 }
 
 func New(ctx context.Context, cfg config.PostgresCfg, logger zerolog.Logger) (*PgRepo, error) {
@@ -54,21 +54,7 @@ func New(ctx context.Context, cfg config.PostgresCfg, logger zerolog.Logger) (*P
 func (db *PgRepo) SaveAlias(ctx context.Context, original, alias string) error {
 	newURL := converter.New(alias, original)
 
-	conn, err := db.DB.Acquire(ctx)
-	if err != nil {
-		return fmt.Errorf("connection acquire fail: %w", err)
-	}
-	defer conn.Release()
-
-	tx, err := conn.Begin(ctx)
-	if err != nil {
-		return fmt.Errorf("begin transaction fail: %w", err)
-	}
-	defer func() {
-		txFinisher(ctx, tx, err)
-	}()
-
-	if _, err = tx.Exec(ctx, createQry, newURL.Alias, newURL.Original, newURL.ExpiresAt, newURL.Visits); err != nil {
+	if _, err := db.Pool.Exec(ctx, createQry, newURL.Alias, newURL.Original, newURL.ExpiresAt, newURL.Visits); err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			return errorHandler(pgErr)
@@ -81,13 +67,7 @@ func (db *PgRepo) SaveAlias(ctx context.Context, original, alias string) error {
 func (db *PgRepo) GetOrigURL(ctx context.Context, alias string) (string, error) {
 	var originalURL string
 
-	conn, err := db.DB.Acquire(ctx)
-	if err != nil {
-		return "", fmt.Errorf("connection acquire fail: %w", err)
-	}
-	defer conn.Release()
-
-	tx, err := conn.Begin(ctx)
+	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
 		return "", fmt.Errorf("begin transaction fail: %w", err)
 	}
@@ -102,10 +82,12 @@ func (db *PgRepo) GetOrigURL(ctx context.Context, alias string) (string, error) 
 		}
 		return "", fmt.Errorf("query execution fail: %w", err)
 	}
+
 	_, err = tx.Exec(ctx, updateVisitsQry, alias)
 	if err != nil {
 		return "", fmt.Errorf("query execution fail: %w", err)
 	}
+
 	return originalURL, nil
 }
 
