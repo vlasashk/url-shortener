@@ -47,12 +47,13 @@ func (s *UseCase) CreateAlias(ctx context.Context, url string) (string, error) {
 	alias := aliasgen.Generate()
 
 	err := s.aliasSaver.SaveAlias(ctx, url, alias)
-	for err != nil && errors.Is(err, models.ErrAliasCollision) {
+
+	for errors.Is(err, models.ErrAliasCollision) {
 		alias = aliasgen.Generate()
 		err = s.aliasSaver.SaveAlias(ctx, url, alias)
 	}
 
-	if err != nil {
+	for err != nil {
 		return "", err
 	}
 

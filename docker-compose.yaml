@@ -35,6 +35,8 @@ services:
     depends_on:
       shortener_db:
         condition: service_healthy
+      migration:
+        condition: service_completed_successfully
     networks:
       - backend
 
@@ -48,6 +50,25 @@ services:
     depends_on:
       shortener_db:
         condition: service_healthy
+    networks:
+      - backend
+
+  migration:
+    container_name: migration
+    image: alpine/curl:latest
+    depends_on:
+      shortener_db:
+        condition: service_healthy
+    env_file:
+      - ./config/docker.env
+    volumes:
+      - ./migrations:/migrations
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        curl -fsSL https://raw.githubusercontent.com/pressly/goose/master/install.sh | sh && 
+        goose -dir=/migrations postgres "postgres://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@$${POSTGRES_HOST}/$${POSTGRES_DB}?sslmode=disable" up
     networks:
       - backend
 

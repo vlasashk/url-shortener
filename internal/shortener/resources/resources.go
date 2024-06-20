@@ -30,7 +30,7 @@ func NewResources(ctx context.Context, cfg config.ShortenerCfg) (Resources, erro
 	return Resources{
 		Log: log,
 		UseCase: usecase.New(
-			cfg.App.Address,
+			cfg.App.BaseURL,
 			pgRepo,
 			pgRepo,
 		),

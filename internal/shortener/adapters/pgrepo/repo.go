@@ -13,7 +13,6 @@ import (
 	"github.com/vlasashk/url-shortener/config"
 	"github.com/vlasashk/url-shortener/internal/shortener/adapters/pgrepo/converter"
 	"github.com/vlasashk/url-shortener/internal/shortener/models"
-	"github.com/vlasashk/url-shortener/pkg/migration"
 	"github.com/vlasashk/url-shortener/pkg/pgconnect"
 )
 
@@ -42,10 +41,6 @@ func New(ctx context.Context, cfg config.PostgresCfg, logger zerolog.Logger) (*P
 	dbPool, err := pgconnect.Connect(ctx, url, logger)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %w", err)
-	}
-
-	if err = migration.Up(dbPool, cfg.Migrations); err != nil {
-		return nil, fmt.Errorf("unable to apply migrations: %w", err)
 	}
 
 	return &PgRepo{dbPool}, nil
